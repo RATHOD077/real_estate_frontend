@@ -9,115 +9,90 @@ import {
 
 export default function Amenities() {
   const [amenities, setAmenities] = useState([]);
+  const [header, setHeader] = useState({ title: "Amenities", description: "" });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchAmenities = async () => {
+    const fetchData = async () => {
       try {
-        const res = await contentAPI.getAmenities();
-        if (Array.isArray(res.data)) {
-          setAmenities(res.data);
-        } else {
-          throw new Error('Invalid data format');
+        const [amenitiesRes, heroRes] = await Promise.all([
+          contentAPI.getAmenities(),
+          contentAPI.getHero() // Assuming heading/desc is stored here or similar endpoint
+        ]);
+        
+        if (amenitiesRes.data) setAmenities(amenitiesRes.data);
+        // Assuming your backend supports these fields in a settings/hero/amenity-meta call
+        if (heroRes.data) {
+          setHeader({
+            title: heroRes.data.amenity_title || "Amenities",
+            description: heroRes.data.amenity_description || "Thoughtfully crafted surroundings that reflect tradition, comfort, and a human-centered design approach."
+          });
         }
       } catch (err) {
-        console.error('Failed to load amenities:', err);
-        setError('Could not load amenities at the moment');
+        console.error('Failed to load:', err);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchAmenities();
+    fetchData();
   }, []);
 
-  // Automatic icon mapping based on title keywords
   const getIconForTitle = (title) => {
-    if (!title) return <Home size={40} />;
-    const lower = title.toLowerCase();
+    const lower = title?.toLowerCase() || "";
+    const props = { size: 44, strokeWidth: 1.5, className: "text-[#36b3a8]" };
 
-    if (lower.includes('gym') || lower.includes('fitness')) return <Dumbbell size={40} />;
-    if (lower.includes('kid') || lower.includes('play') || lower.includes('child')) return <Baby size={40} />;
-    if (lower.includes('jog') || lower.includes('run') || lower.includes('track')) return <Map size={40} />;
-    if (lower.includes('yoga') || lower.includes('meditation')) return <PersonStanding size={40} />;
-    if (lower.includes('pool') || lower.includes('swim')) return <Bath size={40} />;
-    if (lower.includes('park') || lower.includes('garden') || lower.includes('green')) return <Trees size={40} />;
-    if (lower.includes('security') || lower.includes('guard')) return <Shield size={40} />;
-    if (lower.includes('parking') || lower.includes('car')) return <Car size={40} />;
-    if (lower.includes('club') || lower.includes('house') || lower.includes('community')) return <Building size={40} />;
-    if (lower.includes('spa') || lower.includes('massage') || lower.includes('wellness')) return <HeartPulse size={40} />;
-    if (lower.includes('cafe') || lower.includes('coffee') || lower.includes('dining')) return <Coffee size={40} />;
-    if (lower.includes('wifi') || lower.includes('internet')) return <Wifi size={40} />;
-    if (lower.includes('restaurant') || lower.includes('food')) return <Utensils size={40} />;
-
-    // Default fallback
-    return <Home size={40} />;
+    if (lower.includes('gym')) return <Dumbbell {...props} />;
+    if (lower.includes('kid') || lower.includes('play')) return <Baby {...props} />;
+    if (lower.includes('jog') || lower.includes('track')) return <Map {...props} />;
+    if (lower.includes('yoga') || lower.includes('meditation')) return <PersonStanding {...props} />;
+    if (lower.includes('pool')) return <Bath {...props} />;
+    if (lower.includes('park') || lower.includes('green')) return <Trees {...props} />;
+    return <Home {...props} />;
   };
 
-  if (loading) {
-    return (
-      <section className="py-20 bg-[#f0f9f6]">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <Loader2 className="w-12 h-12 animate-spin mx-auto text-emerald-600" />
-          <p className="mt-4 text-gray-600">Loading amenities...</p>
-        </div>
-      </section>
-    );
-  }
-
-  if (error || amenities.length === 0) {
-    return (
-      <section className="py-20 bg-[#f0f9f6]">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-xl text-gray-600">{error || 'No amenities available at the moment'}</p>
-        </div>
-      </section>
-    );
-  }
+  if (loading) return <div className="py-20 text-center"><Loader2 className="animate-spin mx-auto text-[#36b3a8]" /></div>;
 
   return (
-    <section className="py-20 bg-[#f0f9f6]">
+    <section className="py-20 bg-[#f0fdfa]">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="mb-12 text-center">
-          <h2 className="text-4xl md:text-5xl font-serif text-[#1a3a3a] mb-4">Amenities</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Thoughtfully crafted surroundings that reflect tradition, comfort, and a human-centered design approach.
+        {/* Dynamic Heading Section */}
+        <div className="mb-16 text-left ml-4">
+          <h2 className="text-4xl md:text-5xl font-serif text-[#1a3a3a] mb-6 font-bold">
+            {header.title}
+          </h2>
+          <p className="text-gray-500 max-w-3xl text-sm md:text-base leading-relaxed">
+            {header.description}
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
-          {/* Left: Large Image (same as your original) */}
-          <div className="rounded-3xl overflow-hidden shadow-2xl h-[500px] lg:h-[600px]">
+        <div className="flex flex-col lg:flex-row gap-16 items-center">
+          {/* Left: Building Image from Screenshot */}
+          <div className="w-full lg:w-[45%] h-[400px] md:h-[550px] rounded-[40px] overflow-hidden shadow-2xl">
             <img
-              src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1000"
-              alt="Rooftop Amenities"
+              src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=1000"
+              alt="Building View"
               className="w-full h-full object-cover"
             />
           </div>
 
-          {/* Right: Amenities Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-y-12 gap-x-6 text-center">
-            {amenities.map((item, index) => (
-              <div 
-                key={item.id || index} 
-                className="flex flex-col items-center group"
-              >
-                <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-white flex items-center justify-center mb-4 shadow-md border border-emerald-50 transition-all group-hover:scale-110 group-hover:shadow-xl">
-                  <div className="text-[#36b3a8] w-12 h-12 md:w-14 md:h-14 flex items-center justify-center">
-                    {getIconForTitle(item.title)}
-                  </div>
+          {/* Right: Circular Icons Grid */}
+          <div className="w-full lg:w-[55%] grid grid-cols-2 md:grid-cols-3 gap-y-12 gap-x-4">
+            {amenities.slice(0, 6).map((item, index) => (
+              <div key={item.id || index} className="flex flex-col items-center group">
+                {/* Perfect Circle Styling matching reference */}
+                <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-white flex items-center justify-center mb-5 shadow-sm border border-gray-100 transition-all group-hover:shadow-xl group-hover:-translate-y-1">
+                  {getIconForTitle(item.title)}
                 </div>
-                <p className="text-sm md:text-base font-bold text-slate-700 uppercase tracking-tight">
+                <p className="text-sm md:text-base font-bold text-slate-700 tracking-tight text-center">
                   {item.title}
                 </p>
               </div>
             ))}
-
-            {/* View More Button */}
-            <div className="col-span-full mt-8 flex justify-center lg:justify-start lg:pl-8">
-              <button className="bg-gradient-to-r from-[#91c141] to-[#b3d47d] text-white px-10 py-4 rounded-md shadow-lg hover:opacity-90 font-semibold text-base transition-all">
-                View More Amenities
+            
+            {/* Gradient View More Button */}
+            <div className="col-span-full mt-6 flex justify-center lg:justify-start lg:pl-10">
+              <button className="bg-gradient-to-r from-[#99f6e4] to-[#bef264] text-[#1a3a3a] px-8 py-3 rounded-md shadow-md hover:shadow-lg font-bold text-xs uppercase tracking-widest transition-all">
+                View more
               </button>
             </div>
           </div>

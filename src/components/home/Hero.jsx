@@ -13,9 +13,16 @@ export default function Hero() {
 
   useEffect(() => {
     contentAPI.getHero().then(res => {
-      if (res.data) setHero(res.data);
-    }).catch(err => console.error("Using default content"));
+      // Ensure we only set state if data exists to avoid blank sections
+      if (res.data) {
+        setHero(res.data);
+      }
+    }).catch(err => console.error("Using default content", err));
   }, []);
+
+  const renderHeading = (text) => {
+    return text.toUpperCase();
+  };
 
   return (
     <section className="relative w-full bg-white flex flex-col md:flex-row items-center min-h-[600px] overflow-hidden">
@@ -24,23 +31,23 @@ export default function Hero() {
       <div className="w-full md:w-1/2 relative flex flex-col items-center justify-center p-6 md:p-12">
         {/* Top Heading Overlay */}
         <div className="mb-8 text-center md:text-left w-full max-w-lg">
-          <h2 className="text-[#4a3933] text-2xl md:text-4xl font-bold leading-tight tracking-tight">
-            THINKING <br />
-            OF A <span className="text-[#8b2323]">FANTASTIC VICINITY?</span>
+          <h2 className="text-[#4a3933] text-2xl md:text-4xl font-bold leading-tight tracking-tight uppercase">
+            {/* DYNAMIC MAIN HEADING */}
+            {hero.main_heading}
           </h2>
+          
           <div className="mt-2 flex flex-wrap gap-2 text-[10px] md:text-xs font-bold text-gray-500 tracking-tighter uppercase">
-            <span>20+ PODIUM LUXURIOUS AMENITIES</span>
-            <span className="text-gray-300">|</span>
-            <span>SPACIOUS BALCONY HOMES*</span>
+            {/* DYNAMIC SUB HEADING */}
+            <span>{hero.sub_heading}</span>
           </div>
         </div>
 
-        {/* Building Image - Reduced size to match reference */}
-        <div className="w-full max-w-md md:max-w-lg aspect-[4/5] rounded-sm overflow-hidden shadow-2xl transition-transform hover:scale-[1.02] duration-700">
+        {/* Building Image */}
+        <div className="w-full max-w-md md:max-w-[480px] h-[350px] md:h-[450px] rounded-sm overflow-hidden shadow-2xl transition-transform hover:scale-[1.01] duration-700">
           <img 
             src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=1000" 
             alt="Vighnaharta Infinity Building" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-top"
           />
         </div>
       </div>
@@ -60,7 +67,6 @@ export default function Hero() {
             Infinity
           </h1>
           
-          {/* Decorative Divider */}
           <div className="flex items-center justify-center gap-4 mt-6">
             <div className="w-24 h-[1px] bg-gray-300"></div>
             <div className="w-2 h-2 border border-gray-400 rotate-45"></div>
@@ -70,7 +76,6 @@ export default function Hero() {
 
         {/* Pricing Grid */}
         <div className="grid grid-cols-2 w-full max-w-lg relative">
-          {/* Vertical Center Divider */}
           <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-gray-300"></div>
 
           {/* 1 BHK */}
